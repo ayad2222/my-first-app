@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunix — منظومة العملات والمكافآت</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080d1a;
+            --surface: #0f1829;
+            --surface2: #162035;
+            --border: rgba(99,160,255,0.12);
+            --border2: rgba(99,160,255,0.22);
+            --primary: #4f8ef7;
+            --primary-dim: rgba(79,142,247,0.15);
+            --gold: #f5c842;
+            --gold-dim: rgba(245,200,66,0.12);
+            --green: #2ecc8a;
+            --green-dim: rgba(46,204,138,0.12);
+            --red: #f05b5b;
+            --red-dim: rgba(240,91,91,0.12);
+            --text: #e8f0fe;
+            --text2: #8aa3cc;
+            --text3: #4f6a99;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+        /* ── Auth ── */
+        #auth-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at 30% 60%, rgba(79,142,247,0.07) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 20%, rgba(245,200,66,0.05) 0%, transparent 50%);
+        }
+        .auth-card {
+            width: 380px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 40px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--gold));
+        }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .auth-logo .brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 1px;
+        }
+        .auth-logo p {
+            font-size: 13px;
+            color: var(--text2);
+            margin-top: 4px;
+        }
+        .auth-tabs {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text2);
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .auth-tab.active {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* ── Inputs ── */
+        .field { margin-bottom: 16px; }
+        .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; letter-spacing: 0.3px; }
+        .field input {
+            width: 100%;
+            padding: 11px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .field input:focus { border-color: var(--primary); }
+        .field input::placeholder { color: var(--text3); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-full { width: 100%; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #6aa2fa; }
+        .btn-gold { background: var(--gold); color: #1a1200; }
+        .btn-gold:hover { background: #f7d35e; }
+        .btn-green { background: var(--green); color: #071d12; }
+        .btn-green:hover { background: #3ee09b; }
+        .btn-red { background: var(--red); color: white; }
+        .btn-red:hover { background: #f57373; }
+        .btn-ghost {
+            background: var(--surface2);
+            color: var(--text2);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+        /* ── Main layout ── */
+        #main-section { min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── Header ── */
+        .top-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-brand { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .header-welcome { font-size: 14px; color: var(--text2); }
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: var(--gold-dim);
+            border: 1px solid rgba(245,200,66,0.25);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+        #header-balance-display { font-size: 15px; }
+
+        /* ── Page content ── */
+        .page-content { flex: 1; padding: 24px 28px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* ── Grid ── */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .card-header {
+            padding: 16px 20px 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-header h3 { font-size: 15px; font-weight: 600; color: var(--text); }
+        .card-icon {
+            width: 30px; height: 30px;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .card-body { padding: 18px 20px; }
+
+        /* ── Balance display ── */
+        .balance-hero {
+            background: linear-gradient(135deg, var(--primary-dim), var(--gold-dim));
+            border: 1px solid rgba(79,142,247,0.2);
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .balance-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+        .balance-value { font-size: 36px; font-weight: 700; color: var(--green); line-height: 1; }
+        .balance-unit { font-size: 14px; color: var(--text2); margin-top: 2px; }
+
+        /* ── Lists ── */
+        .item-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .item-list li {
+            padding: 10px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .item-list li .item-main { flex: 1; }
+        .item-list li .item-title { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+        .item-list li .item-sub { font-size: 12px; color: var(--text2); }
+        .empty-state { text-align: center; color: var(--text3); font-size: 13px; padding: 20px 0; }
+
+        /* ── Tags ── */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .tag-gold { background: var(--gold-dim); color: var(--gold); }
+        .tag-green { background: var(--green-dim); color: var(--green); }
+        .tag-red { background: var(--red-dim); color: var(--red); }
+        .tag-blue { background: var(--primary-dim); color: var(--primary); }
+
+        /* ── Task proof input ── */
+        .proof-row { display: flex; gap: 6px; margin-top: 6px; flex-direction: column; }
+        .proof-row input {
+            flex: 1;
+            padding: 7px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+        .proof-row input:focus { border-color: var(--primary); }
+
+        /* ── Owner submissions ── */
+        .sub-item {
+            padding: 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .sub-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .sub-item-header strong { color: var(--text); font-size: 14px; }
+        .sub-item-header span { font-size: 13px; color: var(--text2); }
+        .sub-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .proof-thumb { width: 80px; height: 50px; object-fit: cover; border-radius: 5px; border: 1px solid var(--border); cursor: pointer; }
+
+        /* ── Tabs (owner nav) ── */
+        .section-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1px;
+        }
+        .section-tab {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text2);
+            font-family: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -1px;
+        }
+        .section-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+        /* ── Toast ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.success { border-color: rgba(46,204,138,0.4); color: var(--green); }
+        #toast.error { border-color: rgba(240,91,91,0.4); color: var(--red); }
+
+        /* ── Separator ── */
+        .sep { height: 1px; background: var(--border); margin: 16px 0; }
+
+        /* ── Image upload ── */
+        .img-upload-area {
+            border: 2px dashed var(--border2);
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin-top: 6px;
+            background: var(--bg);
+            position: relative;
+        }
+        .img-upload-area:hover { border-color: var(--primary); background: var(--primary-dim); }
+        .img-upload-area input[type=file] { display: none; }
+        .img-upload-area .upload-label { font-size: 13px; color: var(--text2); cursor: pointer; display: block; }
+        .img-upload-area .upload-icon { font-size: 22px; margin-bottom: 4px; display: block; }
+        .img-preview-box { margin-top: 8px; display: none; }
+        .img-preview-box img { max-width: 100%; max-height: 140px; border-radius: 6px; border: 1px solid var(--border); object-fit: cover; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 28px;
+            width: 360px;
+            max-width: 94vw;
+            position: relative;
+        }
+        .modal-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; color: var(--text); }
+        .modal-close {
+            position: absolute; top: 14px; left: 16px;
+            background: none; border: none; color: var(--text2);
+            font-size: 20px; cursor: pointer; line-height: 1;
+        }
+        .modal-close:hover { color: var(--text); }
+        .contact-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .contact-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .contact-option:hover { border-color: var(--primary); background: var(--primary-dim); }
+        .contact-option.selected { border-color: var(--primary); background: var(--primary-dim); }
+        .contact-option .plat-icon { font-size: 20px; width: 26px; text-align: center; }
+        .contact-option .plat-name { font-size: 14px; font-weight: 600; color: var(--text); }
+        .contact-input-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .contact-input-row label { font-size: 12px; color: var(--text2); font-weight: 500; }
+        .contact-input-row input {
+            width: 100%; padding: 10px 12px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text);
+            font-family: inherit; font-size: 14px; outline: none;
+        }
+        .contact-input-row input:focus { border-color: var(--primary); }
+
+        /* ── Responsive ── */
+        @media(max-width: 600px) {
+            .top-header { padding: 0 16px; }
+            .page-content { padding: 16px; }
+            .auth-card { width: 94vw; padding: 28px 22px; }
+        }
+
+        .hidden { display: none !important; }
+
+        /* ── Loading spinner ── */
+        .spinner {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Section headings ── */
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 18px;
+        }
+        .section-title span { color: var(--primary); }
+    </style>
+
+    <style id="favorites-styles">
+        .fav-btn {
+            background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text3); transition: color 0.2s;
+        }
+        .fav-btn.active { color: var(--red); }
+        .fav-btn:hover { color: var(--red); }
+    </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════════════ AUTH ═══════════════════ -->
+<div id="auth-section">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <div class="brand">✦ SUNIX</div>
+            <p>منظومة العملات والمكافآت</p>
+        </div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+            <button class="auth-tab" onclick="switchAuthTab('register')">حساب جديد</button>
+        </div>
+        <div class="field">
+            <label>اسم المستخدم</label>
+            <input type="text" id="login-username" placeholder="أدخل اسمك" autocomplete="username">
+        </div>
+        <div class="field">
+            <label>كلمة المرور</label>
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
+                   onkeydown="if(event.key==='Enter') doAuth()">
+        </div>
+        <button class="btn btn-primary btn-full" id="auth-btn" onclick="doAuth()">دخول</button>
+    </div>
+</div>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div id="main-section" class="hidden">
+
+    <!-- Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <div class="header-brand">✦ SUNIX</div>
+            <div class="header-welcome" id="welcome-msg">مرحباً</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="header-badge" id="balance-badge" style="display:none;">
+                <span>💰</span>
+                <span id="header-balance-display">0</span>
+                <span style="font-size:11px;opacity:0.7;">نقطة</span>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="logout()">🚪 خروج</button>
+        </div>
+    </header>
+
+    <div class="page-content">
+        <!-- Section Tabs for User -->
+        <div id="user-tabs" class="section-tabs hidden">
+            <button class="section-tab active" onclick="switchUserTab('main')">🏠 الرئيسية</button>
+            <button class="section-tab" onclick="switchUserTab('favs')">❤️ المفضلة</button>
+        </div>
+
+
+        <!-- ───── USER VIEW ───── -->
+        <div id="user-view" class="hidden">
+            <div id="user-tab-main">
+                <div class="grid-3" style="margin-bottom:18px;">
+                    <!-- رصيدي -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--green-dim);">💳</div>
+                            <h3>حسابي الشخصي</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="balance-hero">
+                                <div class="balance-label">رصيدك الحالي</div>
+                                <div class="balance-value" id="user-balance">0</div>
+                                <div class="balance-unit">نقطة</div>
+                            </div>
+                            <button class="btn btn-green btn-full" onclick="claimDailyGift()">
+                                🎁 استلام الهدية اليومية (+100)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- تحويل -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--primary-dim);">💸</div>
+                            <h3>تحويل النقاط</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="field">
+                                <label>اسم المستلم</label>
+                                <input type="text" id="transfer-recipient-name" placeholder="مثال: Arkon">
+                            </div>
+                            <div class="field">
+                                <label>عدد النقاط</label>
+                                <input type="number" id="transfer-amount" min="1" placeholder="مثال: 200">
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="executeTransfer()">إرسال الآن</button>
+                        </div>
+                    </div>
+
+                    <!-- متجر -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--gold-dim);">🛒</div>
+                            <h3>متجر المكافآت</h3>
+                        </div>
+                        <div class="card-body" style="max-height:260px;overflow-y:auto;">
+                            <ul class="item-list" id="user-store-list">
+                                <li><span class="empty-state" style="width:100%">المتجر فارغ حالياً</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- مهام -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--primary-dim);">📋</div>
+                            <h3>المهام المتاحة</h3>
+                        </div>
+                        <div class="card-body" style="max-height:320px;overflow-y:auto;">
+                            <ul class="item-list" id="user-tasks-list">
+                                <li><span class="empty-state" style="width:100%">لا توجد مهام حالياً</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- سجل المعاملات -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--surface2);">📜</div>
+                            <h3>سجل المعاملات</h3>
+                        </div>
+                        <div class="card-body" style="max-height:320px;overflow-y:auto;">
+                            <ul class="item-list" id="user-transactions-history">
+                                <li><span class="empty-state" style="width:100%">لا توجد معاملات بعد</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Favorites Tab View -->
+            <div id="user-tab-favs" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon" style="background:var(--red-dim);">❤️</div>
+                        <h3>منتجاتك المفضلة</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="item-list" id="user-favorites-list">
+                            <li><span class="empty-state" style="width:100%">لا توجد منتجات في المفضلة</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───── OWNER VIEW ───── -->
+        <div id="owner-view" class="hidden">
+            <div class="section-tabs">
+                <button class="section-tab active" onclick="ownerTab('add')">➕ الإضافة</button>
+                <button class="section-tab" onclick="ownerTab('submissions')">📥 طلبات التوثيق</button>
+                <button class="section-tab" onclick="ownerTab('purchases')">🛍️ طلبات الشراء</button>
+            </div>
+
+            <!-- تبويب الإضافة -->
+            <div id="owner-tab-add">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--gold-dim);">📌</div>
+                            <h3>إضافة مهمة جديدة</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="field">
+                                <label>عنوان المهمة</label>
+                                <input type="text" id="new-task-title" placeholder="مثال: متابعة صفحتنا على إنستغرام">
+                            </div>
+                            <div class="field">
+                                <label>الجائزة (نقاط)</label>
+                                <input type="number" id="new-task-points" placeholder="مثال: 150">
+                            </div>
+                            <button class="btn btn-gold btn-full" onclick="addNewTask()">نشر المهمة</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon" style="background:var(--green-dim);">📦</div>
+                            <h3>إضافة منتج للمتجر</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="field">
+                                <label>اسم المنتج</label>
+                                <input type="text" id="new-product-name" placeholder="مثال: بطاقة هدية 50$">
+                            </div>
+                            <div class="field">
+                                <label>السعر (نقاط)</label>
+                                <input type="number" id="new-product-price" placeholder="مثال: 1000">
+                            </div>
+                            <button class="btn btn-green btn-full" onclick="addNewProduct()">إضافة للمتجر</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تبويب التوثيقات -->
+            <div id="owner-tab-submissions" class="hidden">
+                <div id="owner-submissions-list">
+                    <p class="empty-state">لا توجد طلبات معلقة حالياً</p>
+                </div>
+            </div>
+
+            <!-- تبويب الشراء -->
+            <div id="owner-tab-purchases" class="hidden">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="item-list" id="owner-purchases-list">
+                            <li><span class="empty-state" style="width:100%">لا توجد عمليات شراء بعد</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /page-content -->
+</div><!-- /main-section -->
+
+<!-- ══ Modal: بيانات التواصل عند الشراء ══ -->
+<div class="modal-overlay" id="buy-modal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeBuyModal()">✕</button>
+        <h3>🛒 إتمام الشراء</h3>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:16px;">اختر وسيلة تواصل ليتواصل معك المالك لتسليم المنتج</p>
+        <div class="contact-options" id="contact-options">
+            <div class="contact-option" onclick="selectPlatform(this,'Discord')">
+                <span class="plat-icon">💬</span><span class="plat-name">Discord</span>
+            </div>
+            <div class="contact-option" onclick="selectPlatform(this,'Instagram')">
+                <span class="plat-icon">📸</span><span class="plat-name">Instagram</span>
+            </div>
+            <div class="contact-option" onclick="selectPlatform(this,'Telegram')">
+                <span class="plat-icon">✈️</span><span class="plat-name">Telegram</span>
+            </div>
+            <div class="contact-option" onclick="selectPlatform(this,'WhatsApp')">
+                <span class="plat-icon">📞</span><span class="plat-name">WhatsApp</span>
+            </div>
+            <div class="contact-option" onclick="selectPlatform(this,'Twitter/X')">
+                <span class="plat-icon">🐦</span><span class="plat-name">Twitter / X</span>
+            </div>
+        </div>
+        <div class="contact-input-row" id="contact-handle-row" style="display:none;">
+            <label id="contact-handle-label">معرّفك على المنصة</label>
+            <input type="text" id="contact-handle-input" placeholder="أدخل المعرّف أو الرقم">
+        </div>
+        <button class="btn btn-green btn-full" onclick="confirmBuy()">تأكيد الشراء</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = '/api';
+    let currentUser = null;
+    let userToken = null;
+    let authMode = 'login';
+
+    async function apiFetch(endpoint, method = 'GET', body = null) {
+        const headers = { 'Content-Type': 'application/json' };
+        if (userToken) headers['Authorization'] = `Bearer ${userToken}`;
+        
+        const options = { method, headers };
+        if (body) options.body = JSON.stringify(body);
+
+        try {
+            const res = await fetch(`${API_URL}${endpoint}`, options);
+            if (res.status === 401 || res.status === 403) { logout(); return null; }
+            return await res.json();
+        } catch (e) {
+            console.error(e);
+            toast('خطأ في الاتصال بالخادم', 'error');
+            return null;
+        }
+    }
+
+    function saveSession(token, user) {
+        localStorage.setItem('sunix_token', token);
+        localStorage.setItem('sunix_user', JSON.stringify(user));
+    }
+    function clearSession() {
+        localStorage.removeItem('sunix_token');
+        localStorage.removeItem('sunix_user');
+    }
+    async function restoreSession() {
+        const token = localStorage.getItem('sunix_token');
+        const user = localStorage.getItem('sunix_user');
+        if (!token || !user) return;
+        userToken = token;
+        currentUser = JSON.parse(user);
+        
+        // Verify token/get fresh data
+        const fresh = await apiFetch('/me');
+        if (fresh) {
+            currentUser = { ...currentUser, ...fresh };
+            showMainInterface();
+        } else {
+            clearSession();
+        }
+    }
+
+    function showMainInterface() {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('main-section').classList.remove('hidden');
+        document.getElementById('welcome-msg').textContent = `مرحباً، ${currentUser.username}`;
+        
+        document.getElementById('user-view').classList.add('hidden');
+        document.getElementById('owner-view').classList.add('hidden');
+        document.getElementById('user-tabs').classList.add('hidden');
+        document.getElementById('balance-badge').style.display = 'none';
+
+        if (currentUser.role === 'owner') {
+            document.getElementById('owner-view').classList.remove('hidden');
+            loadOwnerData();
+        } else {
+            document.getElementById('user-view').classList.remove('hidden');
+            document.getElementById('user-tabs').classList.remove('hidden');
+            document.getElementById('balance-badge').style.display = 'flex';
+            loadUserData();
+        }
+    }
+
+    restoreSession();
+
+    function toast(msg, type = '') {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = type ? `show ${type}` : 'show';
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.className = '', 2800);
+    }
+
+    function switchAuthTab(mode) {
+        authMode = mode;
+        document.querySelectorAll('.auth-tab').forEach((t, i) => {
+            t.classList.toggle('active', (i === 0 && mode === 'login') || (i === 1 && mode === 'register'));
+        });
+        document.getElementById('auth-btn').textContent = mode === 'login' ? 'دخول' : 'إنشاء الحساب';
+    }
+
+    async function doAuth() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!username || !password) return toast('يرجى ملء جميع الحقول', 'error');
+
+        if (authMode === 'register') {
+            const res = await apiFetch('/register', 'POST', { username, password });
+            if (res && !res.error) {
+                toast('تم إنشاء الحساب! يمكنك الآن الدخول', 'success');
+                switchAuthTab('login');
+            } else if (res) toast(res.error, 'error');
+        } else {
+            const res = await apiFetch('/login', 'POST', { username, password });
+            if (res && res.token) {
+                userToken = res.token;
+                currentUser = res.user;
+                saveSession(userToken, currentUser);
+                showMainInterface();
+            } else if (res) toast(res.error, 'error');
+        }
+    }
+
+    function logout() {
+        userToken = null;
+        currentUser = null;
+        clearSession();
+        document.getElementById('main-section').classList.add('hidden');
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('balance-badge').style.display = 'none';
+    }
+
+    /* ── User Navigation ── */
+    function switchUserTab(tab) {
+        document.getElementById('user-tab-main').classList.toggle('hidden', tab !== 'main');
+        document.getElementById('user-tab-favs').classList.toggle('hidden', tab !== 'favs');
+        document.querySelectorAll('#user-tabs .section-tab').forEach(el => {
+            el.classList.toggle('active', (el.textContent.includes('الرئيسية') && tab === 'main') || (el.textContent.includes('المفضلة') && tab === 'favs'));
+        });
+        if (tab === 'favs') loadFavorites();
+    }
+
+    async function loadUserData() {
+        const bal = await apiFetch('/balance');
+        if (bal) {
+            document.getElementById('user-balance').textContent = bal.balance;
+            document.getElementById('header-balance-display').textContent = bal.balance;
+        }
+
+        const txs = await apiFetch('/transactions');
+        const txList = document.getElementById('user-transactions-history');
+        if (txs && txs.length) {
+            txList.innerHTML = txs.map(tx => `<li><div class="item-main"><div class="item-title">${tx.type}</div></div><span class="tag tag-green">${tx.amount} ن</span></li>`).join('');
+        } else {
+            txList.innerHTML = '<li><span class="empty-state" style="width:100%">لا توجد معاملات بعد</span></li>';
+        }
+
+        const tasks = await apiFetch('/tasks');
+        const taskList = document.getElementById('user-tasks-list');
+        if (tasks && tasks.length) {
+            taskList.innerHTML = tasks.map(t => {
+                let action = '';
+                if (t.status) {
+                    const statMap = { Pending: ['⏳','قيد المراجعة','tag-blue'], Approved: ['✅','مقبولة','tag-green'], Rejected: ['❌','مرفوضة','tag-red'] };
+                    const [ico, lbl, cls] = statMap[t.status];
+                    action = `<span class="tag ${cls}">${ico} ${lbl}</span>`;
+                } else {
+                    action = `<div class="proof-row">
+                        <div class="img-upload-area" onclick="document.getElementById('proof-file-${t.id}').click()">
+                            <input type="file" id="proof-file-${t.id}" accept="image/*" onchange="previewProof('${t.id}', this)">
+                            <span class="upload-icon">📷</span><label class="upload-label">اضغط لرفع صورة الإثبات</label>
+                        </div>
+                        <div class="img-preview-box" id="proof-preview-box-${t.id}"><img id="proof-preview-${t.id}" src=""></div>
+                        <button class="btn btn-primary btn-sm" style="margin-top:6px;width:100%;" onclick="submitProof(${t.id},'${t.title}')">رفع الإثبات</button>
+                    </div>`;
+                }
+                return `<li style="flex-direction:column; align-items:flex-start; gap:8px;">
+                    <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+                        <div class="item-title">${t.title}</div><span class="tag tag-gold">+${t.points} ن</span>
+                    </div>${action}</li>`;
+            }).join('');
+        }
+
+        const products = await apiFetch('/products');
+        const storeList = document.getElementById('user-store-list');
+        if (products && products.length) {
+            storeList.innerHTML = products.map(p => `<li>
+                <div class="item-main">
+                    <div class="item-title">🛒 ${p.name}</div>
+                    <div class="item-sub">${p.price} نقطة</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="fav-btn ${p.isFavorite ? 'active' : ''}" onclick="toggleFavorite(${p.id})">❤️</button>
+                    <button class="btn btn-green btn-sm" onclick="buyProduct(${p.id}, ${p.price}, '${p.name}')">شراء</button>
+                </div>
+            </li>`).join('');
+        }
+    }
+
+    async function loadFavorites() {
+        const favs = await apiFetch('/favorites');
+        const favList = document.getElementById('user-favorites-list');
+        if (favs && favs.length) {
+            favList.innerHTML = favs.map(p => `<li>
+                <div class="item-main">
+                    <div class="item-title">🛒 ${p.name}</div>
+                    <div class="item-sub">${p.price} نقطة</div>
+                </div>
+                <button class="btn btn-green btn-sm" onclick="buyProduct(${p.id}, ${p.price}, '${p.name}')">شراء</button>
+            </li>`).join('');
+        } else {
+            favList.innerHTML = '<li><span class="empty-state" style="width:100%">لا توجد منتجات في المفضلة</span></li>';
+        }
+    }
+
+    async function toggleFavorite(productId) {
+        const res = await apiFetch('/favorites/toggle', 'POST', { productId });
+        if (res) {
+            toast(res.status === 'added' ? 'تمت الإضافة للمفضلة' : 'تمت الإزالة من المفضلة', 'success');
+            loadUserData();
+        }
+    }
+
+    async function claimDailyGift() {
+        const res = await apiFetch('/claim-daily', 'POST');
+        if (res && !res.error) { toast('🎉 تم إضافة 100 نقطة!', 'success'); loadUserData(); }
+        else if (res) toast(res.error, 'error');
+    }
+
+    async function executeTransfer() {
+        const recipientName = document.getElementById('transfer-recipient-name').value.trim();
+        const amount = parseInt(document.getElementById('transfer-amount').value);
+        const res = await apiFetch('/transfer', 'POST', { recipientName, amount });
+        if (res && !res.error) { toast('تم التحويل بنجاح!', 'success'); loadUserData(); }
+        else if (res) toast(res.error, 'error');
+    }
+
+    function previewProof(id, input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById(`proof-preview-box-${id}`).style.display = 'block';
+                document.getElementById(`proof-preview-${id}`).src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function submitProof(taskId, taskTitle) {
+        const file = document.getElementById(`proof-file-${taskId}`).files[0];
+        if (!file) return toast('اختر صورة أولاً', 'error');
+        const reader = new FileReader();
+        reader.onload = async e => {
+            const res = await apiFetch('/tasks/submit', 'POST', { taskId, taskTitle, proofImage: e.target.result });
+            if (res) { toast('تم إرسال الإثبات', 'success'); loadUserData(); }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    let _pendingBuy = null;
+    function buyProduct(productId, price, productName) {
+        _pendingBuy = { productId, price, productName };
+        document.getElementById('buy-modal').classList.add('open');
+    }
+    function closeBuyModal() { document.getElementById('buy-modal').classList.remove('open'); }
+    function selectPlatform(el, name) {
+        document.querySelectorAll('.contact-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('contact-handle-row').style.display = 'flex';
+        document.getElementById('contact-handle-label').textContent = `معرّفك على ${name}`;
+        _selectedPlatform = name;
+    }
+    let _selectedPlatform = '';
+    async function confirmBuy() {
+        const handle = document.getElementById('contact-handle-input').value.trim();
+        if (!handle || !_selectedPlatform) return toast('أدخل بيانات التواصل', 'error');
+        const res = await apiFetch('/products/buy', 'POST', { ..._pendingBuy, contactPlatform: _selectedPlatform, contactHandle: handle });
+        if (res && !res.error) { toast('تم الشراء بنجاح', 'success'); closeBuyModal(); loadUserData(); }
+        else if (res) toast(res.error, 'error');
+    }
+
+    /* ── Owner Logic ── */
+    function ownerTab(name) {
+        ['add','submissions','purchases'].forEach(t => document.getElementById('owner-tab-' + t).classList.toggle('hidden', t !== name));
+        document.querySelectorAll('.section-tab').forEach((el, i) => el.classList.toggle('active', ['add','submissions','purchases'][i] === name));
+    }
+
+    async function loadOwnerData() {
+        const subs = await apiFetch('/owner/submissions');
+        const subList = document.getElementById('owner-submissions-list');
+        if (subs && subs.length) {
+            subList.innerHTML = subs.map(s => `<div class="sub-item">
+                <div class="sub-item-header"><strong>${s.username}</strong><span>→ ${s.taskTitle}</span></div>
+                <div class="sub-actions">
+                    <img src="${s.proofImage}" class="proof-thumb" onclick="window.open(this.src)">
+                    <button class="btn btn-green btn-sm" onclick="reviewSub(${s.id},'Approved',${s.userId},'${s.taskTitle}',${s.taskId})">✔ قبول</button>
+                    <button class="btn btn-red btn-sm" onclick="reviewSub(${s.id},'Rejected',${s.userId})">✖ رفض</button>
+                </div>
+            </div>`).join('');
+        } else { subList.innerHTML = '<p class="empty-state">لا توجد طلبات معلقة</p>'; }
+
+        const buys = await apiFetch('/owner/purchases');
+        const buyList = document.getElementById('owner-purchases-list');
+        if (buys && buys.length) {
+            buyList.innerHTML = buys.map(p => `<li><div class="item-main"><div class="item-title">${p.username} اشترى ${p.productName}</div><div class="item-sub">${p.contactPlatform}: ${p.contactHandle}</div></div><span class="tag tag-gold">${p.price} ن</span></li>`).join('');
+        }
+    }
+
+    async function reviewSub(submissionId, status, userId, taskTitle, taskId) {
+        // Need points for the task
+        const tasks = await apiFetch('/tasks');
+        const task = tasks.find(t => t.id === taskId);
+        const points = task ? task.points : 0;
+        const res = await apiFetch('/owner/review-submission', 'POST', { submissionId, status, userId, points, taskTitle });
+        if (res) { toast(status === 'Approved' ? 'تم القبول' : 'تم الرفض', 'success'); loadOwnerData(); }
+    }
+
+    async function addNewTask() {
+        const title = document.getElementById('new-task-title').value.trim();
+        const points = parseInt(document.getElementById('new-task-points').value);
+        const res = await apiFetch('/owner/tasks', 'POST', { title, points });
+        if (res) { toast('تمت الإضافة', 'success'); loadOwnerData(); }
+    }
+
+    async function addNewProduct() {
+        const name = document.getElementById('new-product-name').value.trim();
+        const price = parseInt(document.getElementById('new-product-price').value);
+        const res = await apiFetch('/owner/products', 'POST', { name, price });
+        if (res) { toast('تمت الإضافة', 'success'); loadOwnerData(); }
+    }
+</script>
+</body>
+</html>
